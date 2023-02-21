@@ -6,12 +6,9 @@ h1 {
   text-align: center;
 }
 
-h2 {
-  text-align: center;
-}
-
-.container {
+.columns {
   display: flex;
+  flex-direction: row;
 }
 
 .left-column {
@@ -20,8 +17,4 @@ h2 {
 
 .right-column {
   width: 40%;
-}
-
-.point {
-  fill: black;
 }
