@@ -7,7 +7,7 @@ const innerHeight = height - margin.top - margin.bottom;
 const radius = 10;
 
 // create SVG element
-const svg = d3.select('#scatterplot')
+const svgScatter = d3.select('#scatterplot')
   .attr('width', width)
   .attr('height', height);
 
@@ -25,11 +25,11 @@ const xAxis = d3.axisBottom(xScale);
 const yAxis = d3.axisLeft(yScale);
 
 // add axis to SVG
-svg.append('g')
+svgScatter.append('g')
   .attr('transform', `translate(${margin.left}, ${innerHeight + margin.top})`)
   .call(xAxis);
 
-svg.append('g')
+svgScatter.append('g')
   .attr('transform', `translate(${margin.left}, ${margin.top})`)
   .call(yAxis);
 
@@ -41,7 +41,7 @@ d3.csv('data/scatter-data.csv', (d) => {
     d.selected = false;
     return d;
   }).then((data) => {
-    svg.selectAll('circle')
+    svgScatter.selectAll('circle')
       .data(data)
       .enter()
       .append('circle')
@@ -87,7 +87,7 @@ form.on('submit', (event) => {
 
 	const newData = { x, y, selected: false };
 	
-	svg.append('circle')
+	svgScatter.append('circle')
 		.datum(newData)
 		.attr('cx', d => xScale(d.x) + margin.left)
 		.attr('cy', d => yScale(d.y) + margin.top)
@@ -121,105 +121,74 @@ form.on('submit', (event) => {
 		});
 });
 
-// create SVG element
-const svg2 = d3.select('#barchart')
-  .attr('width', width)
-  .attr('height', height);
+// create SVG Bar chart
+const svgBar = d3.select('#bar-chart')
+.attr('width', width)
+.attr('height', height);
 
-// create scales
-const xScale2 = d3.scaleLinear()
-  .domain([0, 9])
-  .range([0, innerWidth]);
+// create tooltip
+const tooltip = d3.select("#tooltip")
+.style("position", "absolute")
+.style("z-index", "10")
+.style("visibility", "hidden");
 
-const yScale2 = d3.scaleLinear()
-  .domain([0, 9])
-  .range([innerHeight, 0]);
-
-// create axis
-const xAxis2 = d3.axisBottom(xScale);
-const yAxis2 = d3.axisLeft(yScale);
-
-// add axis to SVG
-svg.append('g')
-  .attr('transform', `translate(${margin.left}, ${innerHeight + margin.top})`)
-  .call(xAxis);
-
-svg.append('g')
-  .attr('transform', `translate(${margin.left}, ${margin.top})`)
-  .call(yAxis);
-
-
-// set the dimensions of the canvas
-var margin = {top: 20, right: 20, bottom: 70, left: 40},
-    width = 600 - margin.left - margin.right,
-    height = 300 - margin.top - margin.bottom;
-
-// set the ranges
-var x = d3.scaleBand().range([0, width]).padding(0.1);
-var y = d3.scaleLinear().range([height, 0]);
-
-// create the svg canvas
-var svg = d3.select("#bar-chart")
-            .append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-            .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-// read the data from CSV file
-d3.csv("bar-data.csv", function(error, data) {
-  if (error) throw error;
-
-  // format the data
-  data.forEach(function(d) {
-    d.Value = +d.Value;
-  });
-
-  // set the domains of x and y
-  x.domain(data.map(function(d) { return d.Category; }));
-  y.domain([0, d3.max(data, function(d) { return d.Value; })]);
-
-  // draw the x axis
-  svg.append("g")
-     .attr("transform", "translate(0," + height + ")")
-     .call(d3.axisBottom(x));
-
-  // draw the y axis
-  svg.append("g")
-     .call(d3.axisLeft(y));
-
-  // draw the bars
-  var bars = svg.selectAll(".bar")
-                .data(data)
-                .enter()
-                .append("rect")
-                .attr("class", "bar")
-                .attr("x", function(d) { return x(d.Category); })
-                .attr("width", x.bandwidth())
-                .attr("y", function(d) { return y(d.Value); })
-                .attr("height", function(d) { return height - y(d.Value); })
-                .on("mouseover", function(d) { // highlight the bar on hover
-                  d3.select(this).classed("highlight", true);
-                  // show the tooltip with the bar's values
-                  d3.select("#tooltip")
-                    .style("left", d3.event.pageX + "px")
-                    .style("top", d3.event.pageY + "px")
-                    .html("<strong>" + d.Category + "</strong><br>" + d.Value);
-                  d3.select("#tooltip").classed("hidden", false);
-                })
-                .on("mouseout", function(d) { // unhighlight the bar on mouseout
-                  d3.select(this).classed("highlight", false);
-                  d3.select("#tooltip").classed("hidden", true);
-                });
-});
-
-// create the tooltip
-var tooltip = d3.select("#bar-chart")
-                .append("div")
-                .attr("id", "tooltip")
-                .attr("class", "hidden")
-                .html("");
- 
-
-
-
+// load data and draw bar chart
+d3.csv('data/bar-data.csv', (d) => {
+// coerce data to numbers
+d.value = +d.amount;
+return d;
+}).then((data) => {
+		// create scales
+		const xScaleBar = d3.scaleBand()
+		.range([0, innerWidth])
+		.domain(data.map(d => d.category))
+		.paddingInner(0.2)
+		.paddingOuter(0.2);
+	
+		const yScaleBar = d3.scaleLinear()
+		.range([innerHeight, 0])
+		.domain([0, d3.max(data, d => d.value)]);
+	
+		// create axis
+		const xAxisBar = d3.axisBottom(xScaleBar)
+		const yAxisBar = d3.axisLeft(yScaleBar)
+	
+		// add axis to svgBar
+		svgBar.append('g')
+		.attr('transform', `translate(${margin.left}, ${innerHeight + margin.top})`)
+		.call(xAxisBar);
+	
+		svgBar.append('g')
+		.attr('transform', `translate(${margin.left}, ${margin.top})`)
+		.call(yAxisBar);
+	
+	// add bars to svgBar
+	svgBar.selectAll('rect')
+		.data(data)
+		.enter()
+		.append('rect')
+		.attr('x', d => xScaleBar(d.category) + margin.left)
+		.attr('y', d => yScaleBar(d.value) + margin.top)
+		.attr('width', xScaleBar.bandwidth())
+		.attr('height', d => innerHeight - yScaleBar(d.value))
+		.attr('fill', 'blue')
+			.on('mouseover', function(d) {
+				// Show tooltip
+				tooltip.text(`Category: ${d.category}, Amount: ${d.value}`)
+					.style('visibility', 'visible')
+					.style('top', `${d3.event.pageY + 10}px`)
+					.style('left', `${d3.event.pageX + 10}px`);
+	
+				// highlight the bar
+				d3.select(this)
+					.attr('fill', 'orange');
+			})
+			.on('mouseout', function(d) {
+				// hide the tooltip and unhighlight the bar
+				tooltip.style('visibility', 'hidden');
+	
+				d3.select(this)
+					.attr('fill', 'blue');
+			});
+		});
+	
