@@ -172,23 +172,25 @@ return d;
 		.attr('width', xScaleBar.bandwidth())
 		.attr('height', d => innerHeight - yScaleBar(d.value))
 		.attr('fill', 'blue')
-			.on('mouseover', function(d) {
-				// Show tooltip
-				tooltip.text(`Category: ${d.category}, Amount: ${d.value}`)
-					.style('visibility', 'visible')
-					.style('top', `${d3.event.pageY + 10}px`)
-					.style('left', `${d3.event.pageX + 10}px`);
-	
-				// highlight the bar
-				d3.select(this)
-					.attr('fill', 'orange');
-			})
-			.on('mouseout', function(d) {
-				// hide the tooltip and unhighlight the bar
-				tooltip.style('visibility', 'hidden');
-	
-				d3.select(this)
-					.attr('fill', 'blue');
-			});
+		.on('mouseover', function(event, d) {
+			// highlight the bar
+			d3.select(this)
+				.attr('fill', 'orange');
+			// Show tooltip
+			tooltip.text(`Category: ${d.category}, Amount: ${d.value}`)
+				.style('visibility', 'visible')
+				.style('top', `${d3.event.pageY + 10}px`)
+				.style('left', `${d3.event.pageX + 10}px`);
+
+		})
+		.on('mouseout', function(d) {
+			// unhighlight bar
+			d3.select(this)
+				.attr('fill', 'blue');
+			
+			// hide tooltip
+			tooltip.style('visibility', 'hidden');
+
 		});
+	});
 	
